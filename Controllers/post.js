@@ -1,7 +1,14 @@
 const prisma = require("../DB/prisma.js");
+const {
+    addPostSchema,
+    getPostSchema,
+    getUserPostsSchema,
+    likePostSchema,
+} = require("../Validation/post.js");
 
 exports.addPost = async (req, res, next) => {
     try {
+        await addPostSchema.validateAsync(req.body);
         const { title, authorId } = req.body;
         const post = await prisma.post.create({
             data: {
@@ -15,13 +22,13 @@ exports.addPost = async (req, res, next) => {
         });
         res.send("post created success");
     } catch (error) {
-        console.log(error);
-        return res.status(500).send(error);
+        next(error);
     }
 };
 
 exports.getPost = async (req, res, next) => {
     try {
+        await getPostSchema.validateAsync(req.params);
         const post = await prisma.post.findUnique({
             where: {
                 id: req.params.id,
@@ -35,13 +42,13 @@ exports.getPost = async (req, res, next) => {
         });
         res.send(post);
     } catch (error) {
-        console.log(error);
-        return res.status(500).send(error);
+        next(error);
     }
 };
 
 exports.getUserPosts = async (req, res, next) => {
     try {
+        await getUserPostsSchema.validateAsync(req.params);
         const posts = await prisma.post.findMany({
             where: {
                 author: {
@@ -56,7 +63,7 @@ exports.getUserPosts = async (req, res, next) => {
         });
         res.send(posts);
     } catch (error) {
-        return res.status(500).send(error);
+        next(error);
     }
 };
 
@@ -77,12 +84,13 @@ exports.getAll = async (req, res, next) => {
         });
         res.send(posts);
     } catch (error) {
-        return res.status(500).send(error);
+        next(error);
     }
 };
 
 exports.likePost = async (req, res, next) => {
     try {
+        await likePostSchema.validateAsync(req.body);
         const { postId, userId } = req.body;
         const post = await prisma.post.update({
             where: {
@@ -99,6 +107,6 @@ exports.likePost = async (req, res, next) => {
         console.log(post);
         res.send("post liked success");
     } catch (error) {
-        return res.status(500).send(error);
+        next(error);
     }
 };

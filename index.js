@@ -3,6 +3,7 @@ const dotenv = require("dotenv");
 const redis = require("./DB/redis.js");
 const userRoutes = require("./Routes/user.js");
 const postRoutes = require("./Routes/post.js");
+const errorHandler = require("./Middlewares/errorMiddleware.js");
 
 dotenv.config();
 
@@ -16,9 +17,7 @@ app.use(express.urlencoded({ extended: false }));
 app.use("/api/user", userRoutes);
 app.use("/api/post", postRoutes);
 
-app.get("/dummy", (req, res) => {
-    res.send("dummy");
-});
+app.use(errorHandler);
 
 app.listen(process.env.PORT, async () => {
     await redis.connect();
